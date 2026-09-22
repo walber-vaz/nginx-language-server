@@ -25,3 +25,7 @@ test: lint  ## Run linters and the test suite
 .PHONY: build
 build:  ## Build the wheel and sdist into dist/
 	uv build
+
+.PHONY: data
+data:  ## Regenerate directive/variable data from nginx.org
+	uv run python scripts/update_nginx_data.py

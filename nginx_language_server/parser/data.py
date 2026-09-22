@@ -17,6 +17,14 @@ def _finish(result: str) -> str:
     return result.replace("“", '"').replace("”", '"').strip()
 
 
+DOCS_URL = "https://nginx.org/en/docs/"
+_COMMERCIAL_NOTE = "**NGINX Plus:** part of the commercial subscription"
+
+
+def _doc_link(link: str | None) -> str:
+    return f"\n\n[nginx.org documentation]({DOCS_URL}{link})" if link else ""
+
+
 def _description(desc: str) -> str:
     desc = wrap_rich_text(desc.strip())
     if desc.endswith(":"):
@@ -36,13 +44,18 @@ class DirectiveDefinition:
     notes: list[str]
     since: str | None
     module: str
+    commercial: bool = False
+    link: str | None = None
 
     ls_detail: str = field(init=False)
     ls_documentation: str = field(init=False)
 
     def __post_init__(self) -> None:
         """Compute the language server strings once."""
-        object.__setattr__(self, "ls_detail", f"dir: {self.name}")
+        detail = f"dir: {self.name}" + (
+            " (NGINX Plus)" if self.commercial else ""
+        )
+        object.__setattr__(self, "ls_detail", detail)
         object.__setattr__(self, "ls_documentation", self._documentation())
 
     @classmethod
@@ -57,6 +70,8 @@ class DirectiveDefinition:
             notes=raw["notes"],
             since=raw["since"],
             module=raw["module"],
+            commercial=raw.get("commercial", False),
+            link=raw.get("link"),
         )
 
     def _documentation(self) -> str:
@@ -90,6 +105,8 @@ class DirectiveDefinition:
         if self.since:
             result += "\n"
             result += wrap_rich_text("**Since:** " + self.since)
+        if self.commercial:
+            result += "\n" + _COMMERCIAL_NOTE
         if self.notes:
             result += "\n\n*Notes:*"
             notes = [wrap_rich_text(note) for note in self.notes]
@@ -97,7 +114,7 @@ class DirectiveDefinition:
                 result += notes[0]
             else:
                 result += "\n- " + "\n- ".join(notes)
-        return _finish(result)
+        return _finish(result + _doc_link(self.link))
 
 
 @dataclass(frozen=True, slots=True)
@@ -107,6 +124,9 @@ class VariableDefinition:
     name: str
     desc: str
     module: str
+    prefix: str | None = None  # "$arg_" for "$arg_name"
+    commercial: bool = False
+    link: str | None = None
 
     ls_detail: str = field(init=False)
     ls_documentation: str = field(init=False)
@@ -119,7 +139,14 @@ class VariableDefinition:
     @classmethod
     def from_json(cls, raw: dict[str, Any]) -> VariableDefinition:
         """Build from a raw variables.json entry."""
-        return cls(name=raw["name"], desc=raw["desc"], module=raw["module"])
+        return cls(
+            name=raw["name"],
+            desc=raw["desc"],
+            module=raw["module"],
+            prefix=raw.get("prefix"),
+            commercial=raw.get("commercial", False),
+            link=raw.get("link"),
+        )
 
     def _documentation(self) -> str:
         result = ""
@@ -128,7 +155,9 @@ class VariableDefinition:
         if self.module:
             result += "\n\n"
             result += wrap_rich_text("**Module:** " + self.module)
-        return _finish(result)
+        if self.commercial:
+            result += "\n" + _COMMERCIAL_NOTE
+        return _finish(result + _doc_link(self.link))
 
 
 FAMILIES = ("http", "stream", "mail")
@@ -136,24 +165,6 @@ CORE = "core"
 # Contexts that do not depend on the top-level block they are in
 GLOBAL_CONTEXTS = ("main", "events", "any")
 _HTTP_ONLY_CONTEXTS = {"location", "if", "ifinlocation", "limit_except"}
-
-# Variables whose name ends with an arbitrary part, e.g. $arg_foo. Keys are
-# the prefix as written in configs, values the entry name in variables.json.
-PREFIX_VARIABLES = {
-    prefix: prefix + "name"
-    for prefix in (
-        "$arg_",
-        "$cookie_",
-        "$http_",
-        "$jwt_claim_",
-        "$jwt_header_",
-        "$sent_http_",
-        "$sent_trailer_",
-        "$upstream_cookie_",
-        "$upstream_http_",
-        "$upstream_trailer_",
-    )
-}
 
 
 def module_family(module: str, contexts: list[str] | None = None) -> str:
@@ -260,7 +271,12 @@ def find_variable(name: str, stack: list[str]) -> VariableDefinition | None:
     available = variables_for(stack)
     if name in available:
         return available[name]
-    for prefix in sorted(PREFIX_VARIABLES, key=len, reverse=True):
-        if name.startswith(prefix) and len(name) > len(prefix):
-            return available.get(PREFIX_VARIABLES[prefix])
-    return None
+    matches = [
+        variable
+        for variable in available.values()
+        if variable.prefix
+        and name.startswith(variable.prefix)
+        and len(name) > len(variable.prefix)
+    ]
+    # "$upstream_http_x" must win over "$http_x"-style shorter prefixes
+    return max(matches, key=lambda v: len(v.prefix or ""), default=None)

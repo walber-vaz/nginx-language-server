@@ -55,6 +55,7 @@ Issues = "https://github.com/walber-vaz/nginx-language-server/issues"
 
 [dependency-groups]
 dev = [
+  "beautifulsoup4>=4.15.0",
   "pyright>=1.1.392",
   "pytest>=8.3",
   "ruff>=0.15",
@@ -95,7 +96,7 @@ ignore = [
 "tests/**" = ["D", "PLR2004"]
 
 [tool.pyright]
-include = ["nginx_language_server", "tests"]
+include = ["nginx_language_server", "scripts", "tests"]
 pythonVersion = "3.10"
 
 [tool.pytest.ini_options]
