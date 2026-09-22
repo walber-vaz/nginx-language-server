@@ -24,19 +24,21 @@ _KINDS = {
 _LEAVES = {"include"}
 
 
+def _child_args(node: nginxconf.Directive, name: str) -> list[str]:
+    """Return the arguments of the first ``name`` directive in a block."""
+    for child in node.block or []:
+        if child.name == name and child.args:
+            return [arg.text for arg in child.args]
+    return []
+
+
 def _label(node: nginxconf.Directive) -> str:
     """Return how a directive is named in the outline."""
     args = [arg.text for arg in node.args]
-    if node.name == "server" and node.block is not None and not args:
-        for child in node.block:
-            if child.name == "server_name" and child.args:
-                args = [arg.text for arg in child.args]
-                break
-        else:
-            for child in node.block:
-                if child.name == "listen" and child.args:
-                    args = [child.args[0].text]
-                    break
+    if node.name == "server" and not args:
+        args = (
+            _child_args(node, "server_name") or _child_args(node, "listen")[:1]
+        )
     return " ".join([node.name, *args])
 
 

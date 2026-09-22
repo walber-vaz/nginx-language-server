@@ -54,6 +54,35 @@ def _checks_context(stack: list[str]) -> bool:
     return not stack or stack[-1] in data.KNOWN_CONTEXTS
 
 
+def _check_directive(
+    node: nginxconf.Directive, settings: Settings, main_config: bool
+) -> _Problem | None:
+    """Return the problem with one directive, if any."""
+    stack = node.context()
+    if not node.name or not _checks_context(stack):
+        return None
+    name = node.name_token
+    if node.name not in data.ALL_DIRECTIVE_NAMES:
+        if not settings.unknown_directives:
+            return None
+        return _Problem(
+            name.start,
+            name.end,
+            f'unknown directive "{node.name}"',
+            DiagnosticSeverity.Warning,
+        )
+    if not stack and not main_config:
+        return None  # included file: the top-level context is unknown
+    if node.name in data.directives_for(stack):
+        return None
+    return _Problem(
+        name.start,
+        name.end,
+        f'"{node.name}" directive is not allowed here',
+        DiagnosticSeverity.Error,
+    )
+
+
 def check(config: nginxconf.Config, settings: Settings) -> list[_Problem]:
     """Return the problems found in a parsed document."""
     problems = [
@@ -64,36 +93,9 @@ def check(config: nginxconf.Config, settings: Settings) -> list[_Problem]:
     ]
     main_config = _is_main_config(config)
     for node in config.walk():
-        stack = node.context()
-        if not node.name or any(
-            ancestor.raw_body is not None for ancestor in node.ancestors()
-        ):
-            continue
-        if not _checks_context(stack):
-            continue
-        name = node.name_token
-        if node.name not in data.ALL_DIRECTIVE_NAMES:
-            if settings.unknown_directives:
-                problems.append(
-                    _Problem(
-                        name.start,
-                        name.end,
-                        f'unknown directive "{node.name}"',
-                        DiagnosticSeverity.Warning,
-                    )
-                )
-            continue
-        if not stack and not main_config:
-            continue  # included file: the top-level context is unknown
-        if node.name not in data.directives_for(stack):
-            problems.append(
-                _Problem(
-                    name.start,
-                    name.end,
-                    f'"{node.name}" directive is not allowed here',
-                    DiagnosticSeverity.Error,
-                )
-            )
+        problem = _check_directive(node, settings, main_config)
+        if problem is not None:
+            problems.append(problem)
     return sorted(problems, key=lambda problem: problem.start)
 
 

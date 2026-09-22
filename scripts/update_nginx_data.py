@@ -150,8 +150,10 @@ def parse_directive(
         since = match.group(1)
 
     anchor = box.find_previous_sibling("a")
-    check(anchor is not None and anchor.get("name"), f"{page}: {name} link")
+    check(anchor is not None, f"{page}: {name} has no anchor")
     assert anchor is not None
+    anchor_name = anchor.attrs.get("name")
+    check(anchor_name, f"{page}: {name} anchor has no name")
 
     desc = ""
     notes: list[str] = []
@@ -175,7 +177,7 @@ def parse_directive(
         "since": since,
         "module": module,
         "commercial": commercial,
-        "link": f"{page}#{anchor['name']}",
+        "link": f"{page}#{anchor_name}",
     }
 
 

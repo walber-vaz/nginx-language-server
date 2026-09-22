@@ -96,5 +96,7 @@ def test_find_variable(name: str, expected: str | None) -> None:
 def test_variables_follow_family() -> None:
     http = find_variable("$remote_addr", ["http"])
     stream = find_variable("$remote_addr", ["stream"])
-    assert http is not None and http.module == "ngx_http_core_module"
-    assert stream is not None and stream.module == "ngx_stream_core_module"
+    assert http is not None
+    assert http.module == "ngx_http_core_module"
+    assert stream is not None
+    assert stream.module == "ngx_stream_core_module"
