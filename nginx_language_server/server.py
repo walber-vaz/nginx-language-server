@@ -6,24 +6,23 @@ Official language server spec:
     https://microsoft.github.io/language-server-protocol/specification
 """
 
+from __future__ import annotations
+
 from lsprotocol.types import (
     TEXT_DOCUMENT_COMPLETION,
+    TEXT_DOCUMENT_DID_CLOSE,
     TEXT_DOCUMENT_HOVER,
-    CompletionItem,
-    CompletionItemKind,
     CompletionList,
     CompletionOptions,
     CompletionParams,
+    DidCloseTextDocumentParams,
     Hover,
-    InsertTextFormat,
-    MarkupContent,
-    MarkupKind,
-    TextDocumentPositionParams,
+    HoverParams,
 )
 from pygls.lsp.server import LanguageServer
 
 from nginx_language_server import __version__, pygls_utils
-from nginx_language_server.parser import DIRECTIVES, VARIABLES, nginxconf
+from nginx_language_server.features import completion, hover
 
 SERVER = LanguageServer(
     name="nginx-language-server",
@@ -31,94 +30,31 @@ SERVER = LanguageServer(
 )
 
 
-# Server capabilities
-
-
 @SERVER.feature(
     TEXT_DOCUMENT_COMPLETION,
-    CompletionOptions(trigger_characters=["$"]),
+    CompletionOptions(trigger_characters=completion.TRIGGER_CHARACTERS),
 )
-def completion(
+def on_completion(
     server: LanguageServer, params: CompletionParams
-) -> CompletionList | None:
+) -> CompletionList:
     """Return completion items."""
     document = server.workspace.get_text_document(params.text_document.uri)
-    parsed = nginxconf.convert(document.source)
-    line = nginxconf.find(parsed, params.position.line)
-    if not line:
-        return None
-    contexts = line.contexts if line.contexts else ["main"]
-    last_context = contexts[-1]
-    if last_context not in DIRECTIVES:
-        return None
-    directives = DIRECTIVES[last_context]
-    completion_items = [
-        CompletionItem(
-            label=directive.name,
-            filter_text=directive.name,
-            detail=directive.ls_detail,
-            documentation=MarkupContent(
-                kind=MarkupKind.Markdown,
-                value=directive.ls_documentation,
-            ),
-            kind=CompletionItemKind.Property,
-            insert_text=directive.name,
-            insert_text_format=InsertTextFormat.PlainText,
-        )
-        for directive in (
-            *directives.values(),
-            *DIRECTIVES["any"].values(),
-            *VARIABLES.values(),
-        )
-    ]
-    return (
-        CompletionList(is_incomplete=False, items=completion_items)
-        if completion_items
-        else None
-    )
+    pos = pygls_utils.to_server(document, params.position)
+    return completion.complete(document, pos)
 
 
 @SERVER.feature(TEXT_DOCUMENT_HOVER)
-def hover(
-    server: LanguageServer, params: TextDocumentPositionParams
-) -> Hover | None:
-    """Support Hover."""
+def on_hover(server: LanguageServer, params: HoverParams) -> Hover | None:
+    """Return documentation for the word under the cursor."""
     document = server.workspace.get_text_document(params.text_document.uri)
-    parsed = nginxconf.convert(document.source)
-    word = document.word_at_position(params.position)
-    line = nginxconf.find(parsed, params.position.line)
+    pos = pygls_utils.to_server(document, params.position)
+    return hover.hover(document, pos)
 
-    # append "_name" to beginning of word
-    word_name = word.rsplit("_", maxsplit=1)[0] + "_name"
 
-    if not line:
-        return None
-    contexts = line.contexts if line.contexts else ["main"]
-    last_context = contexts[-1]
-    possible_directives = (
-        DIRECTIVES[last_context] if last_context in DIRECTIVES else {}
-    )
-    if (
-        len(contexts) >= 2
-        and contexts[-1] == "if"
-        and contexts[-2] == "location"
-    ):
-        possible_directives = {
-            **possible_directives,
-            **DIRECTIVES["ifinlocation"],
-        }
-    possibilities = {**possible_directives, **DIRECTIVES["any"], **VARIABLES}
-    if word not in possibilities:
-        if line.line != params.position.line:
-            return None
-        if word_name not in possibilities:
-            return None
-        found = possibilities[word_name]
-    else:
-        found = possibilities[word]
-    contents = MarkupContent(
-        kind=MarkupKind.Markdown,
-        value=found.ls_documentation,
-    )
-    _range = pygls_utils.current_word_range(document, params.position)
-    return Hover(contents=contents, range=_range)
+@SERVER.feature(TEXT_DOCUMENT_DID_CLOSE)
+def on_did_close(
+    server: LanguageServer, params: DidCloseTextDocumentParams
+) -> None:
+    """Forget cached state of closed documents."""
+    del server  # unused, required by pygls
+    pygls_utils.forget(params.text_document.uri)

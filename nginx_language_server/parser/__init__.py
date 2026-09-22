@@ -1,17 +1,19 @@
-"""Import all parser functions to top of module."""
+"""Parsing of nginx configs and of the bundled directive data."""
 
 from . import nginxconf
 from .data import (
-    DIRECTIVES,
-    VARIABLES,
     DirectiveDefinition,
     VariableDefinition,
+    directives_for,
+    find_variable,
+    variables_for,
 )
 
 __all__ = [
-    "DIRECTIVES",
-    "VARIABLES",
     "DirectiveDefinition",
     "VariableDefinition",
+    "directives_for",
+    "find_variable",
     "nginxconf",
+    "variables_for",
 ]

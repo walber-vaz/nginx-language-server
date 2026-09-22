@@ -35,15 +35,6 @@ wheels = [
 ]
 
 [[package]]
-name = "crossplane"
-version = "0.5.8"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/dd/56/6d38195b422d5c2871cf2e1d85870eaeb7ae759d96392729a03f1a48434d/crossplane-0.5.8.tar.gz", hash = "sha256:b193bd8b963a041d5414ea18dcbb1c55b5424fee3d73bfa1809124605b322101", size = 40346, upload-time = "2022-09-22T09:51:50.873Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/d6/ff/adf98ea07e9ac704dd60d81782c5810e3c51313d741f957a900727d3d4ee/crossplane-0.5.8-py2.py3-none-any.whl", hash = "sha256:ede8e83c9e3a58dfc37c69f5ee065d4b3adc44ae42749ced496962a0e7f545b7", size = 31399, upload-time = "2022-09-22T09:51:48.339Z" },
-]
-
-[[package]]
 name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -82,7 +73,6 @@ name = "nginx-language-server"
 version = "0.9.0"
 source = { editable = "." }
 dependencies = [
-    { name = "crossplane" },
     { name = "lsprotocol" },
     { name = "pygls" },
 ]
@@ -96,7 +86,6 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "crossplane", specifier = ">=0.5.8" },
     { name = "lsprotocol", specifier = ">=2025.0.0" },
     { name = "pygls", specifier = ">=2.1,<3" },
 ]
