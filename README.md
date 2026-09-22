@@ -6,40 +6,66 @@
 
 A [Language Server](https://microsoft.github.io/language-server-protocol/) for `nginx.conf`.
 
+_[Leia em português](README.pt-BR.md)_
+
 > **Maintained fork.** The original project,
 > [pappasam/nginx-language-server](https://github.com/pappasam/nginx-language-server)
 > by Sam Roeca, is no longer maintained. This fork continues its development.
-> Nginx directive and variable data originally came from
-> [hangxingliu/vscode-nginx-conf-hint](https://github.com/hangxingliu/vscode-nginx-conf-hint).
 
-## Capabilities
+## Features
 
-nginx-language-server currently partially supports the following Language Server capabilities with more to be added in the future.
+- **Completion** of directives valid in the current block (`http`, `server`,
+  `location`, `stream`, `mail`, `if in location`, ...), of `$variables`, and
+  of snippets for common blocks (HTTPS server, reverse proxy, PHP-FPM, ...).
+- **Hover** documentation for directives and variables, including prefix
+  variables such as `$arg_page` or `$http_user_agent`, with the version a
+  directive appeared in, an NGINX Plus marker and a link to nginx.org.
+- **Diagnostics** while you type: syntax errors, unknown directives and
+  directives used where nginx does not allow them.
+- **Outline** of `http` / `server` / `location` / `upstream` blocks.
+- **Go to definition** on `include` (globs included) and from `proxy_pass`
+  and the other `*_pass` directives to their `upstream`; `include` paths are
+  clickable links.
+- **Formatting** that keeps comments, blank lines and Lua code intact.
 
-### Language Features
-
-- [textDocument/completion](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_completion)
-- [textDocument/hover](https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_hover)
+Everything keeps working while the file is incomplete, and the server never
+reads included files unless you ask to jump to them. The directive data is
+generated from the nginx.org documentation (nginx 1.31) and refreshed
+monthly.
 
 ## Installation
 
-From your command line (bash / zsh), run:
+The server is distributed through GitHub. With
+[uv](https://docs.astral.sh/uv/):
 
 ```bash
-pip install -U nginx-language-server
+uv tool install git+https://github.com/walber-vaz/nginx-language-server
 ```
 
-`-U` ensures that you're pulling the latest version from pypi.
+or with [pipx](https://pipx.pypa.io/):
 
-Alternatively, consider using [pipx](https://github.com/pipxproject/pipx) to keep nginx-language-server isolated from your other Python dependencies.
+```bash
+pipx install git+https://github.com/walber-vaz/nginx-language-server
+```
 
-## Editor Setup
+Wheels are also attached to every
+[GitHub release](https://github.com/walber-vaz/nginx-language-server/releases).
+Python 3.10 to 3.14 is supported.
 
-The following instructions show how to use nginx-language-server with your development tooling. The instructions assume you have already installed nginx-language-server.
+## Editor setup
 
-### Vim / Neovim
+### Neovim
 
-With [coc.nvim](https://github.com/neoclide/coc.nvim), put the following in `coc-settings.json`:
+With [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) installed
+(Neovim 0.11+):
+
+```lua
+vim.lsp.enable("nginx_language_server")
+```
+
+### coc.nvim
+
+In `coc-settings.json`:
 
 ```json
 {
@@ -53,27 +79,36 @@ With [coc.nvim](https://github.com/neoclide/coc.nvim), put the following in `coc
 }
 ```
 
-In your vimrc, I recommend putting in the following lines to ensure variables complete / hover correctly:
+### Helix
 
-```vim
-augroup custom_nginx
-  autocmd!
-  autocmd FileType nginx setlocal iskeyword+=$
-  autocmd FileType nginx let b:coc_additional_keywords = ['$']
-augroup end
+In `languages.toml`:
+
+```toml
+[language-server.nginx-language-server]
+command = "nginx-language-server"
+
+[[language]]
+name = "nginx"
+language-servers = ["nginx-language-server"]
 ```
 
-Alternatively, you can use [coc-nginx](https://github.com/yaegassy/coc-nginx).
+## Settings
 
-```vim
-let g:coc_global_extensions = ['@yaegassy/coc-nginx']
+Settings are passed as `initializationOptions`:
+
+```json
+{
+  "diagnostics": {
+    "enable": true,
+    "unknownDirectives": true
+  }
+}
 ```
 
-Note: this list is non-exhaustive. If you know of a great choice not included in this list, please submit a PR!
+Set `unknownDirectives` to `false` to silence warnings about directives of
+third-party modules (OpenResty, Brotli, ...).
 
 ## Command line
-
-nginx-language-server can be run directly from the command line.
 
 ```console
 $ nginx-language-server --help
@@ -82,7 +117,7 @@ usage: nginx-language-server [-h] [--version] [--tcp] [--host HOST]
 
 Nginx language server: an LSP server for nginx.conf.
 
-optional arguments:
+options:
   -h, --help           show this help message and exit
   --version            display version information and exit
   --tcp                use TCP server instead of stdio
@@ -97,10 +132,22 @@ Examples:
     Run from stdio: nginx-language-server
 ```
 
-## Inspiration
+## Development
 
-The useful language data for nginx is ported from [vscode-nginx-conf-hint](https://github.com/hangxingliu/vscode-nginx-conf-hint). I would have used this library directly, but alas! It's written only for VSCode and I use Neovim.
+```bash
+uv sync          # install dependencies
+make test        # ruff, pyright and pytest
+make format      # format the code
+make data        # regenerate directive data from nginx.org
+```
 
-## Written by
+A release is made by bumping `version` in `pyproject.toml`, updating
+`CHANGELOG.md` and pushing a `vX.Y.Z` tag; the release workflow builds the
+wheel and publishes a GitHub release.
 
-Samuel Roeca _samuel.roeca@gmail.com_
+## Credits
+
+Originally written by Samuel Roeca. The first versions of the nginx
+directive data came from
+[hangxingliu/vscode-nginx-conf-hint](https://github.com/hangxingliu/vscode-nginx-conf-hint).
+Licensed under the GPL-3.0-only.
