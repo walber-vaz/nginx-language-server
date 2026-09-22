@@ -1,24 +1,19 @@
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
 
-[tool]
-
-[tool.black]
-line-length = 79
-
-[tool.isort]
-profile = "black"
-line_length = 79
-
-[tool.poetry]
+[project]
 name = "nginx-language-server"
-version = "0.9.0"
+version = "0.10.0"
 description = "A language server for nginx.conf"
-authors = ["Sam Roeca <samuel.roeca@gmail.com>"]
 readme = "README.md"
-homepage = "https://github.com/pappasam/nginx-language-server"
-repository = "https://github.com/pappasam/nginx-language-server"
+license = "GPL-3.0-only"
+license-files = ["LICENSE"]
+requires-python = ">=3.10,<3.15"
+authors = [{ name = "Sam Roeca", email = "samuel.roeca@gmail.com" }]
+maintainers = [
+  { name = "Walber Vaz da Silva", email = "wvs.walber@gmail.com" },
+]
 keywords = [
   "nginx",
   "completion",
@@ -29,37 +24,83 @@ keywords = [
   "language-server-protocol",
 ]
 classifiers = [
-  "Development Status :: 2 - Pre-Alpha",
+  "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
   "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Software Development :: Code Generators",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: Text Editors :: Integrated Development Environments (IDE)",
   "Topic :: Utilities",
   "Typing :: Typed",
 ]
-include = ["README.md"]
-license = "GPL-3.0-only"
+dependencies = [
+  "lsprotocol>=2025.0.0",
+  "pygls>=2.1,<3",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.9,<3.15"
-crossplane = "^0.5.8"
-lsprotocol = ">=2023.0.1"
-pydantic = "^1.10.19"
-pygls = "^1.3.1"
-typing-extensions = ">=4.12.2 "
+[project.scripts]
+nginx-language-server = "nginx_language_server.cli:cli"
 
-[tool.poetry.group.dev.dependencies]
-pylint = ">=3.3.3 "
-pyright = ">=1.1.392"
-black = ">=24.10.0"
-docformatter = ">=1.7.5"
-isort = ">=5.13.0"
+[project.urls]
+Homepage = "https://github.com/walber-vaz/nginx-language-server"
+Repository = "https://github.com/walber-vaz/nginx-language-server"
+Changelog = "https://github.com/walber-vaz/nginx-language-server/blob/main/CHANGELOG.md"
+Issues = "https://github.com/walber-vaz/nginx-language-server/issues"
 
-[tool.poetry.scripts]
-nginx-language-server = 'nginx_language_server.cli:cli'
+[dependency-groups]
+dev = [
+  "beautifulsoup4>=4.15.0",
+  "pyright>=1.1.392",
+  "pytest>=8.3",
+  "ruff>=0.15",
+]
 
-[tool.poetry.urls]
-Changelog = "https://github.com/pappasam/nginx-language-server/blob/main/CHANGELOG.md"
-Issues = "https://github.com/pappasam/nginx-language-server/issues"
+[tool.hatch.build.targets.sdist]
+include = [
+  "nginx_language_server",
+  "tests",
+  "CHANGELOG.md",
+  "README.md",
+  "README.pt-BR.md",
+  "LICENSE",
+]
+
+[tool.ruff]
+line-length = 79
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle
+  "W",   # pycodestyle warnings
+  "F",   # pyflakes
+  "I",   # isort
+  "UP",  # pyupgrade
+  "B",   # bugbear
+  "D",   # pydocstyle
+  "PL",  # pylint
+  "RUF", # ruff-specific
+]
+ignore = [
+  "D203",    # conflicts with D211
+  "D213",    # conflicts with D212
+  "PLR2004", # magic values are fine in a data-driven server
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D", "PLR2004"]
+
+[tool.pyright]
+include = ["nginx_language_server", "scripts", "tests"]
+pythonVersion = "3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+xfail_strict = true

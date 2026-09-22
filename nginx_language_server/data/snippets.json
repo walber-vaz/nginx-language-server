@@ -1,53 +1,98 @@
-{
-  "Block events": {
+[
+  {
+    "label": "events block",
     "prefix": "events",
-    "body": "events {\n\t$0\n}"
+    "contexts": ["main"],
+    "body": "events {\n\tworker_connections ${1:1024};\n}"
   },
-  "Block http": {
+  {
+    "label": "http block",
     "prefix": "http",
-    "body": "http {\n\t$0\n}"
+    "contexts": ["main"],
+    "body": "http {\n\tinclude mime.types;\n\tdefault_type application/octet-stream;\n\n\t$0\n}"
   },
-  "Block mail": {
-    "prefix": "mail",
-    "body": "mail {\n\t$0\n}"
-  },
-  "Block stream": {
+  {
+    "label": "stream block",
     "prefix": "stream",
+    "contexts": ["main"],
     "body": "stream {\n\t$0\n}"
   },
-  "Block server": {
+  {
+    "label": "mail block",
+    "prefix": "mail",
+    "contexts": ["main"],
+    "body": "mail {\n\t$0\n}"
+  },
+  {
+    "label": "server block",
     "prefix": "server",
-    "body": "server {\n\t$0\n}"
+    "contexts": ["http/http"],
+    "body": "server {\n\tlisten ${1:80};\n\tserver_name ${2:example.com};\n\n\t$0\n}"
   },
-  "Block location": {
-    "prefix": "location",
-    "body": "location ${location:/} {\n\t$0\n}"
+  {
+    "label": "server block (HTTPS)",
+    "prefix": "server",
+    "contexts": ["http/http"],
+    "body": "server {\n\tlisten 443 ssl;\n\tlisten 443 quic;\n\thttp2 on;\n\thttp3 on;\n\tserver_name ${1:example.com};\n\n\tssl_certificate ${2:/etc/ssl/certs/example.com.pem};\n\tssl_certificate_key ${3:/etc/ssl/private/example.com.key};\n\tadd_header Alt-Svc 'h3=\":443\"; ma=86400';\n\n\t$0\n}"
   },
-  "Block ifinlocation": {
-    "prefix": "ifinlocation",
-    "body": "ifinlocation {\n\t$0\n}"
+  {
+    "label": "server block (redirect to HTTPS)",
+    "prefix": "server",
+    "contexts": ["http/http"],
+    "body": "server {\n\tlisten 80;\n\tserver_name ${1:example.com};\n\treturn 301 https://\\$host\\$request_uri;\n}"
   },
-  "Block limit_except": {
-    "prefix": "limit_except",
-    "body": "limit_except {\n\t$0\n}"
-  },
-  "Block if": {
-    "prefix": "if",
-    "body": "if {\n\t$0\n}"
-  },
-  "Block upstream": {
+  {
+    "label": "upstream block",
     "prefix": "upstream",
-    "body": "upstream ${upstream_name} {\n\t$0\n}"
+    "contexts": ["http/http"],
+    "body": "upstream ${1:backend} {\n\tserver ${2:127.0.0.1:8080};\n\t$0\n}"
   },
-  "Block server with directives": {
+  {
+    "label": "map block",
+    "prefix": "map",
+    "contexts": ["http/http"],
+    "body": "map ${1:\\$source} ${2:\\$result} {\n\tdefault ${3:0};\n\t$0\n}"
+  },
+  {
+    "label": "location block",
+    "prefix": "location",
+    "contexts": ["http/server", "http/location"],
+    "body": "location ${1:/} {\n\t$0\n}"
+  },
+  {
+    "label": "location block (reverse proxy)",
+    "prefix": "location",
+    "contexts": ["http/server", "http/location"],
+    "body": "location ${1:/} {\n\tproxy_pass ${2:http://backend};\n\tproxy_http_version 1.1;\n\tproxy_set_header Host \\$host;\n\tproxy_set_header X-Real-IP \\$remote_addr;\n\tproxy_set_header X-Forwarded-For \\$proxy_add_x_forwarded_for;\n\tproxy_set_header X-Forwarded-Proto \\$scheme;\n\t$0\n}"
+  },
+  {
+    "label": "location block (PHP-FPM)",
+    "prefix": "location",
+    "contexts": ["http/server", "http/location"],
+    "body": "location ~ \\.php\\$ {\n\tinclude fastcgi_params;\n\tfastcgi_param SCRIPT_FILENAME \\$document_root\\$fastcgi_script_name;\n\tfastcgi_pass ${1:unix:/run/php/php-fpm.sock};\n\t$0\n}"
+  },
+  {
+    "label": "if block",
+    "prefix": "if",
+    "contexts": ["http/server", "http/location"],
+    "body": "if (${1:\\$request_method = POST}) {\n\t$0\n}"
+  },
+  {
+    "label": "limit_except block",
+    "prefix": "limit_except",
+    "contexts": ["http/location"],
+    "body": "limit_except ${1:GET} {\n\tdeny all;\n}"
+  },
+  {
+    "label": "server block (stream)",
     "prefix": "server",
-    "body": [
-      "server {",
-      "\tlisten ${address:80};",
-      "\tserver_name ${server_names};",
-      "\taccess_log  ${logs/server.access.log} main;",
-      "\t$0",
-      "}"
-    ]
+    "contexts": ["stream/stream"],
+    "body": "server {\n\tlisten ${1:12345};\n\tproxy_pass ${2:backend};\n\t$0\n}"
+  },
+  {
+    "label": "upstream block (stream)",
+    "prefix": "upstream",
+    "contexts": ["stream/stream"],
+    "body": "upstream ${1:backend} {\n\tserver ${2:127.0.0.1:12345};\n\t$0\n}"
   }
-}
+]

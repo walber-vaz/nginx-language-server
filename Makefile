@@ -5,24 +5,27 @@ help:  ## Print this help menu
 
 .PHONY: setup
 setup:  ## Set up the local development environment
-	poetry install
-	poetry run pre-commit install
+	uv sync
 
-.PHONY: test
-test:  ## Run the tests
-	poetry run black --check --diff nginx_language_server
-	poetry run docformatter --check --recursive nginx_language_server
-	poetry run isort --check nginx_language_server
-	poetry run pylint nginx_language_server
-	poetry run pyright nginx_language_server
-
-.PHONY: publish
-publish:  ## Build & publish the new version
-	poetry build
-	poetry publish
+.PHONY: lint
+lint:  ## Run linters and the type checker
+	uv run ruff check
+	uv run ruff format --check
+	uv run pyright
 
 .PHONY: format
-format:
-	poetry run black nginx_language_server
-	poetry run isort nginx_language_server
-	poetry run docformatter --recursive --in-place nginx_language_server
+format:  ## Format the code
+	uv run ruff check --fix
+	uv run ruff format
+
+.PHONY: test
+test: lint  ## Run linters and the test suite
+	uv run pytest
+
+.PHONY: build
+build:  ## Build the wheel and sdist into dist/
+	uv build
+
+.PHONY: data
+data:  ## Regenerate directive/variable data from nginx.org
+	uv run python scripts/update_nginx_data.py

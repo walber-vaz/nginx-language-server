@@ -1,51 +1,83 @@
-"""Utilities to work with pygls.
+"""Helpers bridging pygls documents and the nginx parser.
 
-Helper functions that simplify working with pygls
+LSP positions count UTF-16 code units; the parser counts Python code
+points. Everything that crosses that boundary goes through here.
 """
 
-from typing import Optional
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
 
 from lsprotocol.types import Position, Range
-from pygls.workspace import Document
+from pygls.workspace import TextDocument
+
+from nginx_language_server.parser import nginxconf
+
+Pos = nginxconf.Pos
+
+_WORD = re.compile(r"\$\{[A-Za-z0-9_]*\}?|\$?[A-Za-z0-9_]+|\$")
 
 
-def char_before_cursor(
-    document: Document, position: Position, default=""
-) -> str:
-    """Get the character directly before the cursor."""
-    try:
-        return document.lines[position.line][position.character - 1]
-    except IndexError:
-        return default
+@dataclass(frozen=True, slots=True)
+class Word:
+    """A word in a line and where it is."""
+
+    text: str
+    start: Pos
+    end: Pos
 
 
-def char_after_cursor(
-    document: Document, position: Position, default=""
-) -> str:
-    """Get the character directly before the cursor."""
-    try:
-        return document.lines[position.line][position.character]
-    except IndexError:
-        return default
+def to_server(document: TextDocument, position: Position) -> Pos:
+    """Convert a client position to a parser position."""
+    server = document.position_codec.position_from_client_units(
+        document.lines, position
+    )
+    return (server.line, server.character)
 
 
-def current_word_range(
-    document: Document, position: Position
-) -> Optional[Range]:
-    """Get the range of the word under the cursor."""
-    word = document.word_at_position(position)
-    word_len = len(word)
-    line: str = document.lines[position.line]
-    start = 0
-    for _ in range(1000):  # prevent infinite hanging in case we hit edge case
-        begin = line.find(word, start)
-        if begin == -1:
-            return None
-        end = begin + word_len
-        if begin <= position.character <= end:
-            return Range(
-                start=Position(line=position.line, character=begin),
-                end=Position(line=position.line, character=end),
+def to_client_range(document: TextDocument, start: Pos, end: Pos) -> Range:
+    """Convert a parser range to a client range."""
+    return document.position_codec.range_to_client_units(
+        document.lines,
+        Range(
+            start=Position(line=start[0], character=start[1]),
+            end=Position(line=end[0], character=end[1]),
+        ),
+    )
+
+
+def word_at(document: TextDocument, pos: Pos) -> Word | None:
+    """Return the directive name or variable touching ``pos``."""
+    line_number, char = pos
+    if line_number >= len(document.lines):
+        return None
+    line = document.lines[line_number]
+    for match in _WORD.finditer(line):
+        if match.start() <= char <= match.end():
+            return Word(
+                match.group(),
+                (line_number, match.start()),
+                (line_number, match.end()),
             )
-        start = end
     return None
+
+
+_cache: dict[str, tuple[int | None, str, nginxconf.Config]] = {}
+
+
+def parse(document: TextDocument) -> nginxconf.Config:
+    """Parse a document, reusing the last result while it is unchanged."""
+    source = document.source
+    cached = _cache.get(document.uri)
+    if cached is not None and cached[0] == document.version:
+        if document.version is not None or cached[1] == source:
+            return cached[2]
+    config = nginxconf.parse(source)
+    _cache[document.uri] = (document.version, source, config)
+    return config
+
+
+def forget(uri: str) -> None:
+    """Drop the cached parse of a closed document."""
+    _cache.pop(uri, None)
