@@ -6,8 +6,6 @@ Official language server spec:
     https://microsoft.github.io/language-server-protocol/specification
 """
 
-from typing import Optional
-
 from lsprotocol.types import (
     TEXT_DOCUMENT_COMPLETION,
     TEXT_DOCUMENT_HOVER,
@@ -45,8 +43,8 @@ SERVER = LanguageServer(
 )
 def completion(
     server: LanguageServer, params: CompletionParams
-) -> Optional[CompletionList]:
-    """Returns completion items."""
+) -> CompletionList | None:
+    """Return completion items."""
     document = server.workspace.get_document(params.text_document.uri)
     parsed = nginxconf.convert(document.source)
     line = nginxconf.find(parsed, params.position.line)
@@ -86,7 +84,7 @@ def completion(
 @SERVER.feature(TEXT_DOCUMENT_HOVER)
 def hover(
     server: LanguageServer, params: TextDocumentPositionParams
-) -> Optional[Hover]:
+) -> Hover | None:
     """Support Hover."""
     document = server.workspace.get_document(params.text_document.uri)
     parsed = nginxconf.convert(document.source)

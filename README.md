@@ -1,12 +1,16 @@
 # Nginx Language Server
 
-[![image-version](https://img.shields.io/pypi/v/nginx-language-server.svg)](https://python.org/pypi/nginx-language-server)
-[![image-license](https://img.shields.io/badge/license-GPL%203.0--only-orange)](https://python.org/pypi/jedi-language-server)
-[![image-python-versions](https://img.shields.io/badge/python->=3.9-blue)](https://python.org/pypi/jedi-language-server)
+[![ci](https://github.com/walber-vaz/nginx-language-server/actions/workflows/ci.yaml/badge.svg)](https://github.com/walber-vaz/nginx-language-server/actions/workflows/ci.yaml)
+[![image-license](https://img.shields.io/badge/license-GPL%203.0--only-orange)](LICENSE)
+[![image-python-versions](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12%20|%203.13%20|%203.14-blue)](pyproject.toml)
 
 A [Language Server](https://microsoft.github.io/language-server-protocol/) for `nginx.conf`.
 
-Still under construction, expect big / potentially breaking changes for a while.
+> **Maintained fork.** The original project,
+> [pappasam/nginx-language-server](https://github.com/pappasam/nginx-language-server)
+> by Sam Roeca, is no longer maintained. This fork continues its development.
+> Nginx directive and variable data originally came from
+> [hangxingliu/vscode-nginx-conf-hint](https://github.com/hangxingliu/vscode-nginx-conf-hint).
 
 ## Capabilities
 

@@ -2,7 +2,7 @@
 
 import os
 from tempfile import NamedTemporaryFile
-from typing import Any, Dict, List, NamedTuple, Optional
+from typing import Any, NamedTuple
 
 import crossplane
 
@@ -10,19 +10,19 @@ import crossplane
 class ParsedSymbol(NamedTuple):
     """Expected dictionary."""
 
-    args: List[str]
+    args: list[str]
     directive: str
     line: int
-    contexts: List[str]
+    contexts: list[str]
 
 
-ParsedSymbols = Dict[int, ParsedSymbol]
+ParsedSymbols = dict[int, ParsedSymbol]
 
 
 def _convert(
     parsed_symbols: ParsedSymbols,
-    list_dicts: List[Dict[str, Any]],
-    contexts: List[str],
+    list_dicts: list[dict[str, Any]],
+    contexts: list[str],
 ) -> None:
     """Load the first arg using data from the second and third args."""
     for my_dict in list_dicts:
@@ -34,7 +34,7 @@ def _convert(
             contexts=contexts,
         )
         if "block" in my_dict:
-            new_contexts = contexts + [my_dict["directive"]]
+            new_contexts = [*contexts, my_dict["directive"]]
             _convert(parsed_symbols, my_dict["block"], new_contexts)
 
 
@@ -51,7 +51,7 @@ def convert(code: str) -> ParsedSymbols:
         os.remove(nginx.name)
 
 
-def find(parsed_symbols: ParsedSymbols, start: int) -> Optional[ParsedSymbol]:
+def find(parsed_symbols: ParsedSymbols, start: int) -> ParsedSymbol | None:
     """Find a symbol starting at a line number and searching backwards."""
     for i in range(50):
         if start - i in parsed_symbols:

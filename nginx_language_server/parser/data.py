@@ -3,25 +3,25 @@
 import json
 import pathlib
 import textwrap
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field, validator
 
 from .utils import wrap_plain_text, wrap_rich_text
 
-ListDicts = List[Dict[str, Any]]
+ListDicts = list[dict[str, Any]]
 
 
 class DirectiveDefinition(BaseModel):
     """Strongly typed directive, from directives.json."""
 
     name: str
-    syntax: List[str]
-    default: Optional[str] = Field(alias="def")
-    contexts: List[str]
+    syntax: list[str]
+    default: str | None = Field(alias="def")
+    contexts: list[str]
     desc: str
-    notes: List[str]
-    since: Optional[str]
+    notes: list[str]
+    since: str | None
     module: str
 
     # Calculated values
@@ -119,8 +119,8 @@ class VariableDefinition(BaseModel):
 
 
 # nested directive, with context and directive name as keys
-DirectiveDefinitionLookup = Dict[str, Dict[str, DirectiveDefinition]]
-VariableDefinitionLookup = Dict[str, VariableDefinition]
+DirectiveDefinitionLookup = dict[str, dict[str, DirectiveDefinition]]
+VariableDefinitionLookup = dict[str, VariableDefinition]
 
 
 def load_raw_data(basename: str) -> ListDicts:

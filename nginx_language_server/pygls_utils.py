@@ -3,8 +3,6 @@
 Helper functions that simplify working with pygls
 """
 
-from typing import Optional
-
 from lsprotocol.types import Position, Range
 from pygls.workspace import Document
 
@@ -29,9 +27,7 @@ def char_after_cursor(
         return default
 
 
-def current_word_range(
-    document: Document, position: Position
-) -> Optional[Range]:
+def current_word_range(document: Document, position: Position) -> Range | None:
     """Get the range of the word under the cursor."""
     word = document.word_at_position(position)
     word_len = len(word)

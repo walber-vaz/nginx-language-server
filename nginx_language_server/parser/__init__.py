@@ -7,3 +7,11 @@ from .data import (
     DirectiveDefinition,
     VariableDefinition,
 )
+
+__all__ = [
+    "DIRECTIVES",
+    "VARIABLES",
+    "DirectiveDefinition",
+    "VariableDefinition",
+    "nginxconf",
+]
