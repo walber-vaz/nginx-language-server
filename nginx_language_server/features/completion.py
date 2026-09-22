@@ -21,6 +21,7 @@ from nginx_language_server.parser import (
     nginxconf,
     variables_for,
 )
+from nginx_language_server.parser.data import Snippet, snippets_for
 
 TRIGGER_CHARACTERS = ["$"]
 
@@ -93,4 +94,30 @@ def complete(document: TextDocument, pos: nginxconf.Pos) -> CompletionList:
                     insert_text_format=InsertTextFormat.PlainText,
                 )
             )
+        for snippet in snippets_for(stack):
+            items.append(
+                CompletionItem(
+                    label=snippet.label,
+                    kind=CompletionItemKind.Snippet,
+                    detail="snippet",
+                    documentation=MarkupContent(
+                        kind=MarkupKind.Markdown,
+                        value=f"```nginx\n{snippet_preview(snippet)}\n```",
+                    ),
+                    filter_text=snippet.prefix,
+                    # after the directive of the same name
+                    sort_text=f"{snippet.prefix}~{snippet.label}",
+                    insert_text=snippet.body,
+                    insert_text_format=InsertTextFormat.Snippet,
+                )
+            )
     return CompletionList(is_incomplete=False, items=items)
+
+
+_PLACEHOLDER = re.compile(r"\$\{\d+:((?:[^}\\]|\\.)*)\}|\$\d+")
+
+
+def snippet_preview(snippet: Snippet) -> str:
+    """Return the snippet body with placeholders filled with defaults."""
+    text = _PLACEHOLDER.sub(lambda m: m.group(1) or "", snippet.body)
+    return text.replace("\\$", "$").replace("\\}", "}").expandtabs(4)

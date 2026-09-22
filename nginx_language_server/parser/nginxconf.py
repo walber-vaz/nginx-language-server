@@ -131,6 +131,16 @@ class Config:
                 return node
         return None
 
+    def argument_at(self, pos: Pos) -> tuple[Directive, Token] | None:
+        """Return the directive and argument token under ``pos``."""
+        for node in self.walk():
+            if node.start > pos:
+                break
+            for arg in node.args:
+                if arg.contains(pos):
+                    return node, arg
+        return None
+
     def blocks_at(self, pos: Pos) -> list[Directive]:
         """Return the block directives enclosing ``pos``, outermost first."""
         chain: list[Directive] = []

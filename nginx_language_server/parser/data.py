@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import functools
 import json
 import textwrap
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from importlib import resources
+from types import MappingProxyType
 from typing import Any
 
 from .utils import wrap_plain_text, wrap_rich_text
@@ -247,22 +250,34 @@ DIRECTIVES = index_directives(load_raw_data("directives.json"))
 VARIABLES = index_variables(load_raw_data("variables.json"))
 
 
-def directives_for(stack: list[str]) -> dict[str, DirectiveDefinition]:
+def directives_for(stack: list[str]) -> Mapping[str, DirectiveDefinition]:
     """Return the directives allowed inside the given block stack."""
+    return _directives_for(tuple(context_keys(stack)))
+
+
+@functools.cache
+def _directives_for(
+    keys: tuple[str, ...],
+) -> Mapping[str, DirectiveDefinition]:
     output = dict(DIRECTIVES.get("any", {}))
-    for key in context_keys(stack):
+    for key in keys:
         output.update(DIRECTIVES.get(key, {}))
-    return output
+    return MappingProxyType(output)
 
 
-def variables_for(stack: list[str]) -> dict[str, VariableDefinition]:
+def variables_for(stack: list[str]) -> Mapping[str, VariableDefinition]:
     """Return the variables available inside the given block stack."""
     root = stack[0] if stack else None
-    families = [root] if root in FAMILIES else ["mail", "stream", "http"]
+    return _variables_for(root if root in FAMILIES else None)
+
+
+@functools.cache
+def _variables_for(family: str | None) -> Mapping[str, VariableDefinition]:
+    families = [family] if family else ["mail", "stream", "http"]
     output: dict[str, VariableDefinition] = {}
-    for family in [CORE, *families]:
-        output.update(VARIABLES.get(family, {}))
-    return output
+    for name in [CORE, *families]:
+        output.update(VARIABLES.get(name, {}))
+    return MappingProxyType(output)
 
 
 def find_variable(name: str, stack: list[str]) -> VariableDefinition | None:
@@ -280,3 +295,40 @@ def find_variable(name: str, stack: list[str]) -> VariableDefinition | None:
     ]
     # "$upstream_http_x" must win over "$http_x"-style shorter prefixes
     return max(matches, key=lambda v: len(v.prefix or ""), default=None)
+
+
+ALL_DIRECTIVE_NAMES = frozenset(
+    name for directives in DIRECTIVES.values() for name in directives
+)
+# Every block that holds directives, e.g. "server" or "acme_issuer"
+KNOWN_CONTEXTS = frozenset(key.rsplit("/", 1)[-1] for key in DIRECTIVES) - {
+    "any",
+    "ifinlocation",
+}
+
+
+@dataclass(frozen=True, slots=True)
+class Snippet:
+    """A code snippet offered as a completion item."""
+
+    label: str
+    prefix: str
+    contexts: tuple[str, ...]  # context keys, see context_keys()
+    body: str
+
+
+SNIPPETS = tuple(
+    Snippet(
+        label=raw["label"],
+        prefix=raw["prefix"],
+        contexts=tuple(raw["contexts"]),
+        body=raw["body"],
+    )
+    for raw in load_raw_data("snippets.json")
+)
+
+
+def snippets_for(stack: list[str]) -> list[Snippet]:
+    """Return the snippets that fit in the given block stack."""
+    keys = set(context_keys(stack))
+    return [s for s in SNIPPETS if keys.intersection(s.contexts)]

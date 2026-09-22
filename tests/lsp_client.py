@@ -89,11 +89,16 @@ class LspClient:
         """Send a notification."""
         self._write({"method": method, "params": params})
 
-    def initialize(self) -> dict[str, Any]:
+    def initialize(self, options: Any = None) -> dict[str, Any]:
         """Run the initialize handshake and return the server capabilities."""
         result = self.request(
             "initialize",
-            {"processId": None, "rootUri": None, "capabilities": {}},
+            {
+                "processId": None,
+                "rootUri": None,
+                "capabilities": {},
+                "initializationOptions": options,
+            },
         )
         self.notify("initialized", {})
         return result["capabilities"]
@@ -109,6 +114,32 @@ class LspClient:
                     "version": version,
                     "text": text,
                 }
+            },
+        )
+
+    def diagnostics(self, uri: str) -> list[dict[str, Any]]:
+        """Wait for the diagnostics published for ``uri``."""
+        while True:
+            try:
+                message = self.notifications.get(timeout=TIMEOUT)
+            except Empty:
+                raise TimeoutError(f"no diagnostics for {uri}") from None
+            params = message.get("params") or {}
+            if (
+                message.get("method") == "textDocument/publishDiagnostics"
+                and params.get("uri") == uri
+            ):
+                return params["diagnostics"]
+
+    def position_request(
+        self, method: str, uri: str, line: int, char: int
+    ) -> Any:
+        """Send a request that takes a document and a position."""
+        return self.request(
+            method,
+            {
+                "textDocument": {"uri": uri},
+                "position": {"line": line, "character": char},
             },
         )
 

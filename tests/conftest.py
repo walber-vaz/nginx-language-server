@@ -14,11 +14,19 @@ _doc_counter = itertools.count()
 
 
 @pytest.fixture(scope="module")
-def client(tmp_path_factory: pytest.TempPathFactory) -> Iterator[LspClient]:
+def initialization_options() -> object:
+    """Override in a test module to send initializationOptions."""
+    return None
+
+
+@pytest.fixture(scope="module")
+def client(
+    tmp_path_factory: pytest.TempPathFactory, initialization_options: object
+) -> Iterator[LspClient]:
     """Start one server per test module, already initialized."""
     log = tmp_path_factory.mktemp("lsp") / "server.log"
     lsp = LspClient(log)
-    lsp.initialize()
+    lsp.initialize(initialization_options)
     yield lsp
     lsp.close()
 
@@ -28,7 +36,7 @@ def open_doc(client: LspClient) -> Callable[[str], str]:
     """Open ``text`` under a fresh URI and return that URI."""
 
     def _open(text: str) -> str:
-        uri = f"file:///tmp/test-{next(_doc_counter)}/nginx.conf"
+        uri = f"file:///tmp/nginx-ls-test-{next(_doc_counter)}/nginx.conf"
         client.open(uri, text)
         return uri
 
