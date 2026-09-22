@@ -3,16 +3,9 @@
 import argparse
 import logging
 import sys
-from importlib.metadata import version
 
 from nginx_language_server import __version__
 from nginx_language_server.server import SERVER
-
-
-def get_version() -> str:
-    """Get the program version."""
-    # pylint: disable=import-outside-toplevel
-    return version("nginx-language-server")
 
 
 def cli() -> None:

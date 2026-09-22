@@ -4,30 +4,12 @@ Helper functions that simplify working with pygls
 """
 
 from lsprotocol.types import Position, Range
-from pygls.workspace import Document
+from pygls.workspace import TextDocument
 
 
-def char_before_cursor(
-    document: Document, position: Position, default=""
-) -> str:
-    """Get the character directly before the cursor."""
-    try:
-        return document.lines[position.line][position.character - 1]
-    except IndexError:
-        return default
-
-
-def char_after_cursor(
-    document: Document, position: Position, default=""
-) -> str:
-    """Get the character directly before the cursor."""
-    try:
-        return document.lines[position.line][position.character]
-    except IndexError:
-        return default
-
-
-def current_word_range(document: Document, position: Position) -> Range | None:
+def current_word_range(
+    document: TextDocument, position: Position
+) -> Range | None:
     """Get the range of the word under the cursor."""
     word = document.word_at_position(position)
     word_len = len(word)

@@ -1,121 +1,134 @@
-"""Parse JSON files from the data folder."""
+"""Load directive and variable definitions from the data folder."""
+
+from __future__ import annotations
 
 import json
-import pathlib
 import textwrap
+from dataclasses import dataclass, field
+from importlib import resources
 from typing import Any
-
-from pydantic import BaseModel, Field, validator
 
 from .utils import wrap_plain_text, wrap_rich_text
 
 ListDicts = list[dict[str, Any]]
 
 
-class DirectiveDefinition(BaseModel):
+def _finish(result: str) -> str:
+    return result.replace("“", '"').replace("”", '"').strip()
+
+
+def _description(desc: str) -> str:
+    desc = wrap_rich_text(desc.strip())
+    if desc.endswith(":"):
+        desc = desc[:-1] + "."
+    return desc
+
+
+@dataclass(frozen=True, slots=True)
+class DirectiveDefinition:
     """Strongly typed directive, from directives.json."""
 
     name: str
     syntax: list[str]
-    default: str | None = Field(alias="def")
+    default: str | None
     contexts: list[str]
     desc: str
     notes: list[str]
     since: str | None
     module: str
 
-    # Calculated values
-    ls_detail: str = ""
-    ls_documentation: str = ""
+    ls_detail: str = field(init=False)
+    ls_documentation: str = field(init=False)
 
-    # pylint: disable=no-self-argument
-    # pylint: disable=unused-argument
+    def __post_init__(self) -> None:
+        """Compute the language server strings once."""
+        object.__setattr__(self, "ls_detail", f"dir: {self.name}")
+        object.__setattr__(self, "ls_documentation", self._documentation())
 
-    @validator("ls_detail", always=True)
-    def get_ls_detail(cls, v, values) -> str:
-        """Get detail string."""
-        return f"dir: {values['name']}"
+    @classmethod
+    def from_json(cls, raw: dict[str, Any]) -> DirectiveDefinition:
+        """Build from a raw directives.json entry."""
+        return cls(
+            name=raw["name"],
+            syntax=raw["syntax"],
+            default=raw["def"],
+            contexts=raw["contexts"],
+            desc=raw["desc"],
+            notes=raw["notes"],
+            since=raw["since"],
+            module=raw["module"],
+        )
 
-    @validator("ls_documentation", always=True)
-    def get_ls_documentation(cls, v, values) -> str:
-        """Get documentation string."""
+    def _documentation(self) -> str:
         result = ""
-        if values["default"]:
+        if self.default:
             result += (
                 "```nginx\n"
-                + wrap_plain_text(";\n".join(values["default"].split(";")))
+                + wrap_plain_text(";\n".join(self.default.split(";")))
                 + "\n```\n\n"
             )
-        if values["desc"]:
-            desc = wrap_rich_text(values["desc"].strip())
-            if desc:
-                if desc[-1] == ":":
-                    desc = desc[:-1] + "."
-                result += desc
-        if values["syntax"]:
+        if self.desc:
+            result += _description(self.desc)
+        if self.syntax:
             result += "\n\n"
             result += (
                 "```nginx\n"
                 + textwrap.indent(
-                    wrap_plain_text("\n".join(values["syntax"])),
+                    wrap_plain_text("\n".join(self.syntax)),
                     "  ",
                 )
                 + "\n```"
             )
-        if values["contexts"]:
+        if self.contexts:
             result += "\n"
             result += wrap_plain_text(
-                "**Contexts:** `" + ", ".join(values["contexts"]) + "`"
+                "**Contexts:** `" + ", ".join(self.contexts) + "`"
             )
-        if values["module"]:
+        if self.module:
             result += "\n"
-            result += wrap_rich_text("**Module:** " + values["module"] + "")
-        if values["since"]:
+            result += wrap_rich_text("**Module:** " + self.module)
+        if self.since:
             result += "\n"
-            result += wrap_rich_text("**Since:** " + values["since"])
-        if values["notes"]:
+            result += wrap_rich_text("**Since:** " + self.since)
+        if self.notes:
             result += "\n\n*Notes:*"
-            _notes_wrapped = [wrap_rich_text(note) for note in values["notes"]]
-            if len(_notes_wrapped) == 1:
-                result += _notes_wrapped[0]
+            notes = [wrap_rich_text(note) for note in self.notes]
+            if len(notes) == 1:
+                result += notes[0]
             else:
-                result += "\n- " + "\n- ".join(_notes_wrapped)
-        return result.replace("“", '"').replace("”", '"').strip()
+                result += "\n- " + "\n- ".join(notes)
+        return _finish(result)
 
 
-class VariableDefinition(BaseModel):
+@dataclass(frozen=True, slots=True)
+class VariableDefinition:
     """Strongly typed variable, from variables.json."""
 
     name: str
     desc: str
     module: str
 
-    # Calculated values
-    ls_detail: str = ""
-    ls_documentation: str = ""
+    ls_detail: str = field(init=False)
+    ls_documentation: str = field(init=False)
 
-    # pylint: disable=no-self-argument
-    # pylint: disable=unused-argument
+    def __post_init__(self) -> None:
+        """Compute the language server strings once."""
+        object.__setattr__(self, "ls_detail", f"var: {self.name}")
+        object.__setattr__(self, "ls_documentation", self._documentation())
 
-    @validator("ls_detail", always=True)
-    def get_ls_detail(cls, v, values) -> str:
-        """Get detail string."""
-        return f"var: {values['name']}"
+    @classmethod
+    def from_json(cls, raw: dict[str, Any]) -> VariableDefinition:
+        """Build from a raw variables.json entry."""
+        return cls(name=raw["name"], desc=raw["desc"], module=raw["module"])
 
-    @validator("ls_documentation", always=True)
-    def get_ls_documentation(cls, v, values) -> str:
-        """Get documentation string."""
+    def _documentation(self) -> str:
         result = ""
-        if values["desc"]:
-            desc = wrap_rich_text(values["desc"].strip())
-            if desc:
-                if desc[-1] == ":":
-                    desc = desc[:-1] + "."
-                result += desc
-        if values["module"]:
+        if self.desc:
+            result += _description(self.desc)
+        if self.module:
             result += "\n\n"
-            result += wrap_rich_text("**Module:** " + values["module"] + "")
-        return result.replace("“", '"').replace("”", '"').strip()
+            result += wrap_rich_text("**Module:** " + self.module)
+        return _finish(result)
 
 
 # nested directive, with context and directive name as keys
@@ -124,33 +137,26 @@ VariableDefinitionLookup = dict[str, VariableDefinition]
 
 
 def load_raw_data(basename: str) -> ListDicts:
-    """Pull in raw JSON data from directives file."""
-    path_data = pathlib.Path(__file__).parent.parent.joinpath("data")
-    with path_data.joinpath(basename).open(encoding="UTF-8") as outfile:
-        data_raw = json.load(outfile)
-    return data_raw
+    """Read a JSON file shipped in the package's data folder."""
+    data = resources.files("nginx_language_server") / "data" / basename
+    return json.loads(data.read_text(encoding="utf-8"))
 
 
-def get_directives(
-    directives: ListDicts,
-) -> DirectiveDefinitionLookup:
+def get_directives(directives: ListDicts) -> DirectiveDefinitionLookup:
     """Translate raw JSON directives into cleaned output."""
-    output = {}
-    for directive in directives:
-        for context in directive["contexts"]:
-            new_context = {directive["name"]: DirectiveDefinition(**directive)}
-            if context not in output:
-                output[context] = new_context
-            else:
-                output[context].update(new_context)
+    output: DirectiveDefinitionLookup = {}
+    for raw in directives:
+        directive = DirectiveDefinition.from_json(raw)
+        for context in directive.contexts:
+            output.setdefault(context, {})[directive.name] = directive
     return output
 
 
 def get_variables(variables: ListDicts) -> VariableDefinitionLookup:
     """Translate raw JSON data into cleaned output."""
-    output = {}
-    for variable_raw in variables:
-        variable = VariableDefinition(**variable_raw)
+    output: VariableDefinitionLookup = {}
+    for raw in variables:
+        variable = VariableDefinition.from_json(raw)
         output[variable.name] = variable
     return output
 
