@@ -21,11 +21,7 @@ def cli() -> None:
         prog="nginx-language-server",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description="Nginx language server: an LSP server for nginx.conf.",
-        epilog="""\
-Examples:
-
-    Run from stdio: nginx-language-server
-""",
+        epilog="Examples:\n\n    Run from stdio: nginx-language-server\n",
     )
     parser.add_argument(
         "--version",
