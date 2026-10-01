@@ -2228,7 +2228,7 @@
     "notes": [],
     "since": null,
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#auth_jwt"
   },
   {
@@ -2247,7 +2247,7 @@
     ],
     "since": "1.11.10",
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#auth_jwt_claim_set"
   },
   {
@@ -2265,7 +2265,7 @@
     ],
     "since": "1.11.10",
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#auth_jwt_header_set"
   },
   {
@@ -2283,7 +2283,7 @@
     "notes": [],
     "since": "1.21.4",
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#auth_jwt_key_cache"
   },
   {
@@ -2302,7 +2302,7 @@
     "notes": [],
     "since": null,
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#auth_jwt_key_file"
   },
   {
@@ -2321,7 +2321,7 @@
     "notes": [],
     "since": "1.15.6",
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#auth_jwt_key_request"
   },
   {
@@ -2339,7 +2339,7 @@
     "notes": [],
     "since": "1.13.10",
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#auth_jwt_leeway"
   },
   {
@@ -2358,7 +2358,7 @@
     "notes": [],
     "since": "1.19.7",
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#auth_jwt_type"
   },
   {
@@ -2377,7 +2377,7 @@
     "notes": [],
     "since": "1.21.2",
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#auth_jwt_require"
   },
   {
@@ -4884,7 +4884,7 @@
     "notes": [],
     "since": null,
     "module": "ngx_http_hls_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_hls_module.html#hls"
   },
   {
@@ -4902,7 +4902,7 @@
     "notes": [],
     "since": null,
     "module": "ngx_http_hls_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_hls_module.html#hls_buffers"
   },
   {
@@ -4920,7 +4920,7 @@
     "notes": [],
     "since": "1.5.12",
     "module": "ngx_http_hls_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_hls_module.html#hls_forward_args"
   },
   {
@@ -4938,7 +4938,7 @@
     "notes": [],
     "since": null,
     "module": "ngx_http_hls_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_hls_module.html#hls_fragment"
   },
   {
@@ -4956,7 +4956,7 @@
     "notes": [],
     "since": null,
     "module": "ngx_http_hls_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_hls_module.html#hls_mp4_buffer_size"
   },
   {
@@ -4974,7 +4974,7 @@
     "notes": [],
     "since": null,
     "module": "ngx_http_hls_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_hls_module.html#hls_mp4_max_buffer_size"
   },
   {
@@ -10998,7 +10998,7 @@
     "notes": [],
     "since": null,
     "module": "ngx_http_upstream_hc_module",
-    "commercial": true,
+    "commercial": false,
     "link": "http/ngx_http_upstream_hc_module.html#health_check"
   },
   {
@@ -11016,7 +11016,7 @@
     ],
     "since": null,
     "module": "ngx_http_upstream_hc_module",
-    "commercial": true,
+    "commercial": false,
     "link": "http/ngx_http_upstream_hc_module.html#match"
   },
   {
