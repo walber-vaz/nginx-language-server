@@ -468,7 +468,7 @@
     "prefix": "$jwt_header_",
     "desc": "returns the value of a specified\nJOSE header",
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#var_jwt_header_"
   },
   {
@@ -476,7 +476,7 @@
     "prefix": "$jwt_claim_",
     "desc": "returns the value of a specified\nJWT claim\n\nFor nested claims and claims including a dot (“.”),\nthe value of the variable cannot be evaluated;\nthe auth_jwt_claim_set directive should be used instead.\n\n\nVariable values for tokens encrypted with JWE\nare available only after decryption which occurs during the\nAccess phase.",
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#var_jwt_claim_"
   },
   {
@@ -484,7 +484,7 @@
     "prefix": null,
     "desc": "returns the decrypted top-level payload\nof nested\nor encrypted tokens (1.21.2).\nFor nested tokens returns the enclosed JWS token.\nFor encrypted tokens returns JSON with claims.",
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#var_jwt_payload"
   },
   {
@@ -618,7 +618,7 @@
   {
     "name": "$geoip_region",
     "prefix": null,
-    "desc": "two-symbol country region code (region, territory, state, province, federal land\nand the like), for example,\n“48”, “DC”.",
+    "desc": "country region code (region, territory, state, province, federal land\nand the like).",
     "module": "ngx_http_geoip_module",
     "commercial": false,
     "link": "http/ngx_http_geoip_module.html#var_geoip_region"
@@ -828,7 +828,7 @@
     "prefix": null,
     "desc": "TLV value from the PROXY Protocol header representing the\nID\nof AWS VPC endpoint",
     "module": "ngx_http_proxy_protocol_vendor_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_proxy_protocol_vendor_module.html#var_proxy_protocol_tlv_aws_vpce_id"
   },
   {
@@ -836,7 +836,7 @@
     "prefix": null,
     "desc": "TLV value from the PROXY Protocol header representing the\nLinkID\nof Azure private endpoint",
     "module": "ngx_http_proxy_protocol_vendor_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_proxy_protocol_vendor_module.html#var_proxy_protocol_tlv_azure_pel_id"
   },
   {
@@ -844,7 +844,7 @@
     "prefix": null,
     "desc": "TLV value from the PROXY Protocol header representing\nGoogle Cloud PSC\nconnection ID",
     "module": "ngx_http_proxy_protocol_vendor_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_proxy_protocol_vendor_module.html#var_proxy_protocol_tlv_gcp_conn_id"
   },
   {
@@ -1618,7 +1618,7 @@
   {
     "name": "$geoip_region",
     "prefix": null,
-    "desc": "two-symbol country region code (region, territory, state, province, federal land\nand the like), for example,\n“48”, “DC”.",
+    "desc": "country region code (region, territory, state, province, federal land\nand the like).",
     "module": "ngx_stream_geoip_module",
     "commercial": false,
     "link": "stream/ngx_stream_geoip_module.html#var_geoip_region"
@@ -1684,7 +1684,7 @@
     "prefix": null,
     "desc": "TLV value from the PROXY Protocol header representing the\nID\nof AWS VPC endpoint",
     "module": "ngx_stream_proxy_protocol_vendor_module",
-    "commercial": false,
+    "commercial": true,
     "link": "stream/ngx_stream_proxy_protocol_vendor_module.html#var_proxy_protocol_tlv_aws_vpce_id"
   },
   {
@@ -1692,7 +1692,7 @@
     "prefix": null,
     "desc": "TLV value from the PROXY Protocol header representing the\nLinkID\nof Azure private endpoint",
     "module": "ngx_stream_proxy_protocol_vendor_module",
-    "commercial": false,
+    "commercial": true,
     "link": "stream/ngx_stream_proxy_protocol_vendor_module.html#var_proxy_protocol_tlv_azure_pel_id"
   },
   {
@@ -1700,7 +1700,7 @@
     "prefix": null,
     "desc": "TLV value from the PROXY Protocol header representing\nGoogle Cloud PSC\nconnection ID",
     "module": "ngx_stream_proxy_protocol_vendor_module",
-    "commercial": false,
+    "commercial": true,
     "link": "stream/ngx_stream_proxy_protocol_vendor_module.html#var_proxy_protocol_tlv_gcp_conn_id"
   },
   {

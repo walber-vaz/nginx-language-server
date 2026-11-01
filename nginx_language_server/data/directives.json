@@ -1284,6 +1284,7 @@
     ],
     "desc": "Sets configuration depending on a request URI or the value of a variable (1.31.5).",
     "notes": [
+      "\nThe value of a cacheable variable is evaluated once per request,\nand is also used when locations are searched after\nan internal redirect and in subrequests.\nTo evaluate a predicate on each location search,\na non-cacheable variable can be used, for example,\na map variable\nwith the volatile parameter.\n",
       "\nIn versions from 0.7.1 to 0.8.41, if a request matched the prefix\nlocation without the “=” and “^~”\nmodifiers, the search also terminated and regular expressions were\nnot checked.\n"
     ],
     "since": null,
@@ -2228,7 +2229,7 @@
     "notes": [],
     "since": null,
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#auth_jwt"
   },
   {
@@ -2247,7 +2248,7 @@
     ],
     "since": "1.11.10",
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#auth_jwt_claim_set"
   },
   {
@@ -2265,7 +2266,7 @@
     ],
     "since": "1.11.10",
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#auth_jwt_header_set"
   },
   {
@@ -2283,7 +2284,7 @@
     "notes": [],
     "since": "1.21.4",
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#auth_jwt_key_cache"
   },
   {
@@ -2302,7 +2303,7 @@
     "notes": [],
     "since": null,
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#auth_jwt_key_file"
   },
   {
@@ -2321,7 +2322,7 @@
     "notes": [],
     "since": "1.15.6",
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#auth_jwt_key_request"
   },
   {
@@ -2339,7 +2340,7 @@
     "notes": [],
     "since": "1.13.10",
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#auth_jwt_leeway"
   },
   {
@@ -2358,7 +2359,7 @@
     "notes": [],
     "since": "1.19.7",
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#auth_jwt_type"
   },
   {
@@ -2377,7 +2378,7 @@
     "notes": [],
     "since": "1.21.2",
     "module": "ngx_http_auth_jwt_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_auth_jwt_module.html#auth_jwt_require"
   },
   {
@@ -2746,6 +2747,585 @@
     "module": "ngx_http_dav_module",
     "commercial": false,
     "link": "http/ngx_http_dav_module.html#min_delete_depth"
+  },
+  {
+    "name": "db_auth",
+    "syntax": [
+      "db_auth string;"
+    ],
+    "def": null,
+    "contexts": [
+      "location",
+      "ifinlocation"
+    ],
+    "desc": "Specifies the password string used to authenticate connections to a database server. An empty value disables authentication. Authentication with a separate username and password arguments is not supported.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_auth"
+  },
+  {
+    "name": "db_bind",
+    "syntax": [
+      "db_bind\naddress\n    [transparent] |\n    off;"
+    ],
+    "def": null,
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Makes outgoing connections to a database server originate from the specified local IP address with an optional port. Parameter value can contain variables. The special value off cancels the effect of the db_bind directive inherited from the previous configuration level, which allows the system to auto-assign the local IP address and port. Example:",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_bind"
+  },
+  {
+    "name": "db_buffer_size",
+    "syntax": [
+      "db_buffer_size size;"
+    ],
+    "def": "db_buffer_size 4k|8k;",
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Sets the size of the buffer used for reading the database response. By default, the buffer size is equal to one memory page. This is either 4K or 8K, depending on a platform. It can be made smaller, however.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_buffer_size"
+  },
+  {
+    "name": "db_cache",
+    "syntax": [
+      "db_cache\nzone\n    [timeout=time]\n    [max_size=size]\n    [not_found=on|off|time]\n;"
+    ],
+    "def": null,
+    "contexts": [
+      "location",
+      "ifinlocation"
+    ],
+    "desc": "Enables caching of database lookup results in a shared memory zone defined by the keyval_zone directive. The cache key is the value of the db_get directive, evaluated for the current request. If a cached result is found, it is returned without connecting to the database server.",
+    "notes": [
+      "\nThe module does not provide cache invalidation or purge.\nDatabase changes may remain invisible until cached entries expire\nor are evicted.\nConcurrent cache misses are not combined into a single database request.\n"
+    ],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_cache"
+  },
+  {
+    "name": "db_connect_timeout",
+    "syntax": [
+      "db_connect_timeout time;"
+    ],
+    "def": "db_connect_timeout 60s;",
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Defines a timeout for establishing a connection with a database server. It should be noted that this timeout cannot usually exceed 75 seconds.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_connect_timeout"
+  },
+  {
+    "name": "db_get",
+    "syntax": [
+      "db_get key;"
+    ],
+    "def": null,
+    "contexts": [
+      "location",
+      "ifinlocation"
+    ],
+    "desc": "Specifies the key to retrieve from the database. The key can contain text, variables, and their combination. An empty key is not allowed.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_get"
+  },
+  {
+    "name": "db_name",
+    "syntax": [
+      "db_name string;"
+    ],
+    "def": null,
+    "contexts": [
+      "location",
+      "ifinlocation"
+    ],
+    "desc": "Sets the database to use for lookup requests.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_name"
+  },
+  {
+    "name": "db_next_upstream",
+    "syntax": [
+      "db_next_upstream\nerror |\n    timeout |\n    invalid_response |\n    not_found\noff\n    ...;",
+      "db_next_upstream off;"
+    ],
+    "def": "db_next_upstream error timeout;",
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Specifies the conditions under which a request can be passed to the next database server:",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_next_upstream"
+  },
+  {
+    "name": "db_next_upstream_timeout",
+    "syntax": [
+      "db_next_upstream_timeout time;"
+    ],
+    "def": "db_next_upstream_timeout 0;",
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Limits the time during which a request can be passed to the next server. The 0 value turns off this limitation.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_next_upstream_timeout"
+  },
+  {
+    "name": "db_next_upstream_tries",
+    "syntax": [
+      "db_next_upstream_tries number;"
+    ],
+    "def": "db_next_upstream_tries 0;",
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Limits the number of possible tries for passing a request to the next server. The limit includes the initial attempt. The 0 value turns off this limitation.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_next_upstream_tries"
+  },
+  {
+    "name": "db_pass",
+    "syntax": [
+      "db_pass name;"
+    ],
+    "def": null,
+    "contexts": [
+      "location",
+      "ifinlocation"
+    ],
+    "desc": "Specifies the upstream group used for database lookups:",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_pass"
+  },
+  {
+    "name": "db_read_timeout",
+    "syntax": [
+      "db_read_timeout time;"
+    ],
+    "def": "db_read_timeout 60s;",
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Defines a timeout for reading data from a database server. The timeout is set only between two successive read operations, not for the transmission of the whole response. If the database server does not transmit anything within this time, the connection is closed.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_read_timeout"
+  },
+  {
+    "name": "db_send_timeout",
+    "syntax": [
+      "db_send_timeout time;"
+    ],
+    "def": "db_send_timeout 60s;",
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Defines a timeout for sending data to a database server.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_send_timeout"
+  },
+  {
+    "name": "db_socket_keepalive",
+    "syntax": [
+      "db_socket_keepalive on | off;"
+    ],
+    "def": "db_socket_keepalive off;",
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Configures the “TCP keepalive” behavior for outgoing connections to a database server. If enabled, the SO_KEEPALIVE socket option is turned on.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_socket_keepalive"
+  },
+  {
+    "name": "db_ssl",
+    "syntax": [
+      "db_ssl on | off;"
+    ],
+    "def": "db_ssl off;",
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Enables TLS for connections to database servers.",
+    "notes": [
+      "\nServer certificate verification is disabled by default.\nVerification is configured separately by\ndb_ssl_verify.\n"
+    ],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_ssl"
+  },
+  {
+    "name": "db_ssl_certificate",
+    "syntax": [
+      "db_ssl_certificate file;"
+    ],
+    "def": null,
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Specifies a file with the certificate in the PEM format used for authentication to a database server. The corresponding db_ssl_certificate_key must also be configured.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_ssl_certificate"
+  },
+  {
+    "name": "db_ssl_certificate_cache",
+    "syntax": [
+      "db_ssl_certificate_cache off;",
+      "db_ssl_certificate_cache\nmax=number\n    [inactive=time]\n    [valid=time]\n;"
+    ],
+    "def": "db_ssl_certificate_cache off;",
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Defines a cache that stores SSL certificates and secret keys specified with variables.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_ssl_certificate_cache"
+  },
+  {
+    "name": "db_ssl_certificate_key",
+    "syntax": [
+      "db_ssl_certificate_key file;"
+    ],
+    "def": null,
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Specifies a file with the secret key in the PEM format for the certificate configured by the db_ssl_certificate directive.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_ssl_certificate_key"
+  },
+  {
+    "name": "db_ssl_ciphers",
+    "syntax": [
+      "db_ssl_ciphers ciphers;"
+    ],
+    "def": "db_ssl_ciphers DEFAULT;",
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Specifies the enabled ciphers for connections to database servers. The ciphers are specified in the format understood by the OpenSSL library.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_ssl_ciphers"
+  },
+  {
+    "name": "db_ssl_conf_command",
+    "syntax": [
+      "db_ssl_conf_command name value;"
+    ],
+    "def": null,
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Sets arbitrary OpenSSL configuration commands when establishing a connection with the database server.",
+    "notes": [
+      "\nNote that configuring OpenSSL directly\nmight result in unexpected behavior.\n"
+    ],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_ssl_conf_command"
+  },
+  {
+    "name": "db_ssl_crl",
+    "syntax": [
+      "db_ssl_crl file;"
+    ],
+    "def": null,
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Specifies a file with revoked certificates (CRL) in the PEM format used to verify the certificate of the database server. When using intermediate certificates, their CRLs should be specified in the same file.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_ssl_crl"
+  },
+  {
+    "name": "db_ssl_key_log",
+    "syntax": [
+      "db_ssl_key_log file;"
+    ],
+    "def": null,
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Enables logging of database server connection SSL keys and specifies the path to the key log file. Keys are logged in the SSLKEYLOGFILE format compatible with Wireshark.",
+    "notes": [
+      "\nTLS key logs contain sensitive material that can enable decryption\nof captured traffic.\nProtect these files and enable logging only when needed.\n"
+    ],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_ssl_key_log"
+  },
+  {
+    "name": "db_ssl_name",
+    "syntax": [
+      "db_ssl_name name;"
+    ],
+    "def": null,
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Allows overriding the server name used to verify the database server certificate and to be passed through SNI when establishing a connection with the database server.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_ssl_name"
+  },
+  {
+    "name": "db_ssl_password_file",
+    "syntax": [
+      "db_ssl_password_file file;"
+    ],
+    "def": null,
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Specifies a file with passphrases for secret keys where each passphrase is specified on a separate line. Passphrases are tried in turn when loading the key.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_ssl_password_file"
+  },
+  {
+    "name": "db_ssl_protocols",
+    "syntax": [
+      "db_ssl_protocols \n    [SSLv2]\n    [SSLv3]\n    [TLSv1]\n    [TLSv1.1]\n    [TLSv1.2]\n    [TLSv1.3];"
+    ],
+    "def": "db_ssl_protocols TLSv1.2 TLSv1.3;",
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Enables the specified protocols for connections to database servers.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_ssl_protocols"
+  },
+  {
+    "name": "db_ssl_server_name",
+    "syntax": [
+      "db_ssl_server_name on | off;"
+    ],
+    "def": "db_ssl_server_name off;",
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Enables or disables passing of the server name through TLS Server Name Indication extension (SNI, RFC 6066) when establishing a connection with the database server.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_ssl_server_name"
+  },
+  {
+    "name": "db_ssl_session_reuse",
+    "syntax": [
+      "db_ssl_session_reuse on | off;"
+    ],
+    "def": "db_ssl_session_reuse on;",
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Determines whether SSL sessions can be reused when working with the database server. If the errors “digest check failed” appear in the logs, try disabling session reuse.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_ssl_session_reuse"
+  },
+  {
+    "name": "db_ssl_trusted_certificate",
+    "syntax": [
+      "db_ssl_trusted_certificate file;"
+    ],
+    "def": null,
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Specifies a file with trusted CA certificates in the PEM format used to verify the certificate of the database server.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_ssl_trusted_certificate"
+  },
+  {
+    "name": "db_ssl_verify",
+    "syntax": [
+      "db_ssl_verify on | off;"
+    ],
+    "def": "db_ssl_verify off;",
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Enables or disables verification of the database server certificate. The db_ssl_trusted_certificate directive must also be configured. The directive is required when db_ssl_verify is enabled.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_ssl_verify"
+  },
+  {
+    "name": "db_ssl_verify_depth",
+    "syntax": [
+      "db_ssl_verify_depth number;"
+    ],
+    "def": "db_ssl_verify_depth 1;",
+    "contexts": [
+      "http",
+      "server",
+      "location"
+    ],
+    "desc": "Sets the verification depth in the database server certificate chain. The directive is required when db_ssl_verify is enabled.",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_ssl_verify_depth"
+  },
+  {
+    "name": "db_type",
+    "syntax": [
+      "db_type type;"
+    ],
+    "def": null,
+    "contexts": [
+      "upstream"
+    ],
+    "desc": "Sets the database protocol used by the upstream group. Currently, only redis is supported:",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_type"
+  },
+  {
+    "name": "db_var",
+    "syntax": [
+      "db_var\n$variable\nlocation=URI\nquery=string\n    [default=string];"
+    ],
+    "def": null,
+    "contexts": [
+      "server",
+      "location",
+      "ifinlocation"
+    ],
+    "desc": "Creates a variable whose value is obtained from the response body of a subrequest. The location parameter sets the subrequest URI. The query parameter sets its query string. An empty query string can be specified explicitly:",
+    "notes": [],
+    "since": null,
+    "module": "ngx_http_db_module",
+    "commercial": true,
+    "link": "http/ngx_http_db_module.html#db_var"
   },
   {
     "name": "empty_gif",
@@ -4884,7 +5464,7 @@
     "notes": [],
     "since": null,
     "module": "ngx_http_hls_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_hls_module.html#hls"
   },
   {
@@ -4902,7 +5482,7 @@
     "notes": [],
     "since": null,
     "module": "ngx_http_hls_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_hls_module.html#hls_buffers"
   },
   {
@@ -4920,7 +5500,7 @@
     "notes": [],
     "since": "1.5.12",
     "module": "ngx_http_hls_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_hls_module.html#hls_forward_args"
   },
   {
@@ -4938,7 +5518,7 @@
     "notes": [],
     "since": null,
     "module": "ngx_http_hls_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_hls_module.html#hls_fragment"
   },
   {
@@ -4956,7 +5536,7 @@
     "notes": [],
     "since": null,
     "module": "ngx_http_hls_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_hls_module.html#hls_mp4_buffer_size"
   },
   {
@@ -4974,7 +5554,7 @@
     "notes": [],
     "since": null,
     "module": "ngx_http_hls_module",
-    "commercial": false,
+    "commercial": true,
     "link": "http/ngx_http_hls_module.html#hls_mp4_max_buffer_size"
   },
   {
@@ -6692,6 +7272,22 @@
     "module": "ngx_http_oidc_module",
     "commercial": true,
     "link": "http/ngx_http_oidc_module.html#session_store"
+  },
+  {
+    "name": "session_sync_leeway",
+    "syntax": [
+      "session_sync_leeway time;"
+    ],
+    "def": "session_sync_leeway 0;",
+    "contexts": [
+      "oidc_provider"
+    ],
+    "desc": "Sets the maximum wait time for a session to appear in the key-value zone if a request contains a session cookie but the corresponding session is not found. This allows for session synchronization delays between cluster nodes.",
+    "notes": [],
+    "since": "1.31.6",
+    "module": "ngx_http_oidc_module",
+    "commercial": true,
+    "link": "http/ngx_http_oidc_module.html#session_sync_leeway"
   },
   {
     "name": "session_timeout",
@@ -10998,7 +11594,7 @@
     "notes": [],
     "since": null,
     "module": "ngx_http_upstream_hc_module",
-    "commercial": true,
+    "commercial": false,
     "link": "http/ngx_http_upstream_hc_module.html#health_check"
   },
   {
@@ -11016,7 +11612,7 @@
     ],
     "since": null,
     "module": "ngx_http_upstream_hc_module",
-    "commercial": true,
+    "commercial": false,
     "link": "http/ngx_http_upstream_hc_module.html#match"
   },
   {
@@ -12741,8 +13337,9 @@
     "contexts": [
       "main"
     ],
-    "desc": "Enables routing of QUIC packets using eBPF. When enabled, this allows supporting QUIC connection migration.",
+    "desc": "Enables routing of QUIC packets using eBPF. When enabled, this allows supporting QUIC connection migration. Since 1.31.7, this also allows established QUIC connections to be preserved during configuration reloads and during live upgrade.",
     "notes": [
+      "\nThe directive value cannot be changed during a configuration reload.\nTo change the directive value, nginx must be restarted.\nThe directive cannot be disabled during the live upgrade\nif QUIC BPF maps are inherited from the previous nginx instance.\n",
       "\nThe directive is only supported on Linux 5.7+.\n"
     ],
     "since": null,
@@ -14919,7 +15516,9 @@
       "server"
     ],
     "desc": "Sets server address to pass client connection to. The address can be specified as an IP address and a port:",
-    "notes": [],
+    "notes": [
+      "\nIf the PROXY\nprotocol is used,\nthe header is read before the connection is passed,\nso the proxy_protocol parameter\nshould be specified on the listening socket\nof the original server:\n\nserver {\n    listen 12345 proxy_protocol;\n\n    set_real_ip_from 192.168.1.0/24;\n\n    pass 127.0.0.1:8000;\n}\n\n"
+    ],
     "since": null,
     "module": "ngx_stream_pass_module",
     "commercial": false,
